@@ -101,8 +101,8 @@ __device__ scalar_t deformable_im2col_bilinear(
     const int width,
     scalar_t h,
     scalar_t w) {
-  int h_low = floor(h);
-  int w_low = floor(w);
+  int h_low = floorf(h);
+  int w_low = floorf(w);
   int h_high = h_low + 1;
   int w_high = w_low + 1;
 
@@ -143,8 +143,8 @@ __device__ scalar_t get_gradient_weight(
     return 0;
   }
 
-  int argmax_h_low = floor(argmax_h);
-  int argmax_w_low = floor(argmax_w);
+  int argmax_h_low = floorf(argmax_h);
+  int argmax_w_low = floorf(argmax_w);
   int argmax_h_high = argmax_h_low + 1;
   int argmax_w_high = argmax_w_low + 1;
 
@@ -175,8 +175,8 @@ __device__ scalar_t get_coordinate_weight(
     return 0;
   }
 
-  int argmax_h_low = floor(argmax_h);
-  int argmax_w_low = floor(argmax_w);
+  int argmax_h_low = floorf(argmax_h);
+  int argmax_w_low = floorf(argmax_w);
   int argmax_h_high = argmax_h_low + 1;
   int argmax_w_high = argmax_w_low + 1;
 
@@ -670,8 +670,8 @@ __device__ scalar_t dmcn_im2col_bilinear(
     const int width,
     scalar_t h,
     scalar_t w) {
-  int h_low = floor(h);
-  int w_low = floor(w);
+  int h_low = floorf(h);
+  int w_low = floorf(w);
   int h_high = h_low + 1;
   int w_high = w_low + 1;
 
@@ -712,8 +712,8 @@ __device__ scalar_t dmcn_get_gradient_weight(
     return 0;
   }
 
-  int argmax_h_low = floor(argmax_h);
-  int argmax_w_low = floor(argmax_w);
+  int argmax_h_low = floorf(argmax_h);
+  int argmax_w_low = floorf(argmax_w);
   int argmax_h_high = argmax_h_low + 1;
   int argmax_w_high = argmax_w_low + 1;
 
@@ -744,8 +744,8 @@ __device__ scalar_t dmcn_get_coordinate_weight(
     return 0;
   }
 
-  int argmax_h_low = floor(argmax_h);
-  int argmax_w_low = floor(argmax_w);
+  int argmax_h_low = floorf(argmax_h);
+  int argmax_w_low = floorf(argmax_w);
   int argmax_h_high = argmax_h_low + 1;
   int argmax_w_high = argmax_w_low + 1;
 
