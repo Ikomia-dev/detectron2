@@ -80,26 +80,26 @@ __global__ void SwapAlign2NatForwardFeat(
     idx /= Vout;
 
     const float ox = x * lambda + u - hUout + 0.5;
-    const int xf = static_cast<int>(floor(ox));
-    const int xc = static_cast<int>(ceil(ox));
+    const int xf = static_cast<int>(floorf(ox));
+    const int xc = static_cast<int>(ceilf(ox));
     const float xwc = ox - xf;
     const float xwf = 1. - xwc;
 
     const float oy = y * lambda + v - hVout + 0.5;
-    const int yf = static_cast<int>(floor(oy));
-    const int yc = static_cast<int>(ceil(oy));
+    const int yf = static_cast<int>(floorf(oy));
+    const int yc = static_cast<int>(ceilf(oy));
     const float ywc = oy - yf;
     const float ywf = 1. - ywc;
 
     const float ou = (u + 0.5) / lambda - 0.5;
-    const int uf = static_cast<int>(floor(ou));
-    const int uc = static_cast<int>(ceil(ou));
+    const int uf = static_cast<int>(floorf(ou));
+    const int uc = static_cast<int>(ceilf(ou));
     const float uwc = ou - uf;
     const float uwf = 1. - uwc;
 
     const float ov = (v + 0.5) / lambda - 0.5;
-    const int vf = static_cast<int>(floor(ov));
-    const int vc = static_cast<int>(ceil(ov));
+    const int vf = static_cast<int>(floorf(ov));
+    const int vc = static_cast<int>(ceilf(ov));
     const float vwc = ov - vf;
     const float vwf = 1. - vwc;
 
@@ -184,26 +184,26 @@ __global__ void SwapAlign2NatBackwardFeat(
     idx /= Vout;
 
     const float ox = x * lambda + u - hUout + 0.5;
-    const int xf = static_cast<int>(floor(ox));
-    const int xc = static_cast<int>(ceil(ox));
+    const int xf = static_cast<int>(floorf(ox));
+    const int xc = static_cast<int>(ceilf(ox));
     const float xwc = ox - xf;
     const float xwf = 1. - xwc;
 
     const float oy = y * lambda + v - hVout + 0.5;
-    const int yf = static_cast<int>(floor(oy));
-    const int yc = static_cast<int>(ceil(oy));
+    const int yf = static_cast<int>(floorf(oy));
+    const int yc = static_cast<int>(ceilf(oy));
     const float ywc = oy - yf;
     const float ywf = 1. - ywc;
 
     const float ou = (u + 0.5) / lambda - 0.5;
-    const int uf = static_cast<int>(floor(ou));
-    const int uc = static_cast<int>(ceil(ou));
+    const int uf = static_cast<int>(floorf(ou));
+    const int uc = static_cast<int>(ceilf(ou));
     const float uwc = ou - uf;
     const float uwf = 1. - uwc;
 
     const float ov = (v + 0.5) / lambda - 0.5;
-    const int vf = static_cast<int>(floor(ov));
-    const int vc = static_cast<int>(ceil(ov));
+    const int vf = static_cast<int>(floorf(ov));
+    const int vc = static_cast<int>(ceilf(ov));
     const float vwc = ov - vf;
     const float vwf = 1. - vwc;
 
@@ -424,8 +424,8 @@ at::Tensor SwapAlign2Nat_forward_cuda(
   const int Hin = X.size(2);
   const int Win = X.size(3);
   const float lambda = static_cast<float>(lambda_val);
-  const int Hout = static_cast<int>(ceil(Hin / lambda));
-  const int Wout = static_cast<int>(ceil(Win / lambda));
+  const int Hout = static_cast<int>(ceilf(Hin / lambda));
+  const int Wout = static_cast<int>(ceilf(Win / lambda));
   const float hVout = Vout / 2.;
   const float hUout = Uout / 2.;
 
