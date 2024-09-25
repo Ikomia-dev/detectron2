@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Facebook, Inc. and its affiliates.
 
+# pyre-unsafe
+
 import copy
 import logging
 from typing import Any, Dict, List, Tuple
@@ -164,5 +166,5 @@ class DatasetMapper:
             )
             image_mask = torch.zeros(*image_shape_hw, dtype=torch.float32)
             image_mask[y0:y1, x0:x1] = segm_aligned
-            # segmentation for BitMask: np.array [H, W] of np.bool
+            # segmentation for BitMask: np.array [H, W] of bool
             obj["segmentation"] = image_mask >= 0.5

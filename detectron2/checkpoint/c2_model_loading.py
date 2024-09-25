@@ -4,7 +4,6 @@ import logging
 import re
 from typing import Dict, List
 import torch
-from tabulate import tabulate
 
 
 def convert_basic_c2_names(original_keys):
@@ -318,14 +317,9 @@ def align_and_update_state_dicts(model_state_dict, ckpt_state_dict, c2_conversio
             key_checkpoint = original_keys[key_model]
             shape = str(tuple(model_state_dict[key_model].shape))
             table.append((key_model[len(common_prefix) :], key_checkpoint, shape))
-    table_str = tabulate(
-        table, tablefmt="pipe", headers=["Names in Model", "Names in Checkpoint", "Shapes"]
-    )
+    submodule_str = common_prefix[:-1] if common_prefix else "model"
     logger.info(
-        "Following weights matched with "
-        + (f"submodule {common_prefix[:-1]}" if common_prefix else "model")
-        + ":\n"
-        + table_str
+        f"Following weights matched with submodule {submodule_str} - Total num: {len(table)}"
     )
 
     unmatched_ckpt_keys = [k for k in ckpt_keys if k not in set(matched_keys.keys())]
@@ -387,7 +381,12 @@ def _longest_common_prefix(names: List[str]) -> str:
 
 def _longest_common_prefix_str(names: List[str]) -> str:
     m1, m2 = min(names), max(names)
-    lcp = [a for a, b in zip(m1, m2) if a == b]
+    lcp = []
+    for a, b in zip(m1, m2):
+        if a == b:
+            lcp.append(a)
+        else:
+            break
     lcp = "".join(lcp)
     return lcp
 

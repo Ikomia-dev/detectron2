@@ -1,5 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 
+# pyre-unsafe
+
 from dataclasses import dataclass
 from typing import Any, Optional
 import torch
@@ -74,6 +76,8 @@ class CseAnnotationsAccumulator(AnnotationsAccumulator):
             boxes_xywh_est, boxes_xywh_gt, instances_one_image.gt_densepose
         ):
             if (dp_gt is not None) and (len(dp_gt.x) > 0):
+                # pyre-fixme[6]: For 1st argument expected `Tensor` but got `float`.
+                # pyre-fixme[6]: For 2nd argument expected `Tensor` but got `float`.
                 self._do_accumulate(box_xywh_gt, box_xywh_est, dp_gt)
             self.nxt_bbox_index += 1
 
@@ -122,9 +126,9 @@ class CseAnnotationsAccumulator(AnnotationsAccumulator):
             vertex_mesh_ids_gt=torch.cat(self.vertex_mesh_ids_gt, 0),
             vertex_ids_gt=torch.cat(self.vertex_ids_gt, 0),
             # ignore segmentation annotations, if not all the instances contain those
-            coarse_segm_gt=torch.cat(self.s_gt, 0)
-            if len(self.s_gt) == len(self.bbox_xywh_gt)
-            else None,
+            coarse_segm_gt=(
+                torch.cat(self.s_gt, 0) if len(self.s_gt) == len(self.bbox_xywh_gt) else None
+            ),
             bbox_xywh_gt=torch.cat(self.bbox_xywh_gt, 0),
             bbox_xywh_est=torch.cat(self.bbox_xywh_est, 0),
             point_bbox_with_dp_indices=torch.cat(self.point_bbox_with_dp_indices, 0),

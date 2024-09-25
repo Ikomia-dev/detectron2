@@ -1,4 +1,6 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
+
+# pyre-unsafe
 from dataclasses import fields
 from typing import Any, List
 import torch
@@ -27,7 +29,8 @@ def densepose_inference(densepose_predictor_output: Any, detections: List[Instan
         if densepose_predictor_output is None:
             # don't add `pred_densepose` attribute
             continue
-        n_i = len(detection_i)
+        n_i = detection_i.__len__()
+
         PredictorOutput = type(densepose_predictor_output)
         output_i_dict = {}
         # we assume here that `densepose_predictor_output` is a dataclass object

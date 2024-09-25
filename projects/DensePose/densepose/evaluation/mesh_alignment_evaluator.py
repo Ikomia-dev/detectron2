@@ -1,5 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 
+# pyre-unsafe
+
 import json
 import logging
 from typing import List, Optional
@@ -49,7 +51,7 @@ class MeshAlignmentEvaluator:
                     [keyvertices_2[name] for name in keyvertex_names_1],
                 ]
                 Current_Mean_Distances = 0.255
-                gps = (-(geodists ** 2) / (2 * (Current_Mean_Distances ** 2))).exp()
+                gps = (-(geodists**2) / (2 * (Current_Mean_Distances**2))).exp()
                 avg_errors.append(geodists.mean().item())
                 avg_gps.append(gps.mean().item())
 

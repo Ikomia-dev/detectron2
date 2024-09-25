@@ -1,5 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 
+# pyre-unsafe
+
 import logging
 import numpy as np
 import pickle
@@ -96,7 +98,7 @@ class Embedder(nn.Module):
         state_dict = None
         if fpath.endswith(".pkl"):
             with PathManager.open(fpath, "rb") as hFile:
-                state_dict = pickle.load(hFile, encoding="latin1")  # pyre-ignore[6]
+                state_dict = pickle.load(hFile, encoding="latin1")
         else:
             with PathManager.open(fpath, "rb") as hFile:
                 state_dict = torch.load(hFile, map_location=torch.device("cpu"))
@@ -109,8 +111,6 @@ class Embedder(nn.Module):
                         v_key = torch.from_numpy(v_key)
                     state_dict_local[key[len(prefix) :]] = v_key
             # non-strict loading to finetune on different meshes
-            # pyre-fixme[6]: Expected `OrderedDict[typing.Any, typing.Any]` for 1st
-            #  param but got `Dict[typing.Any, typing.Any]`.
             self.load_state_dict(state_dict_local, strict=False)
 
     def forward(self, mesh_name: str) -> torch.Tensor:

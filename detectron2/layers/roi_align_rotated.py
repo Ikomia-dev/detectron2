@@ -5,9 +5,12 @@ from torch.autograd import Function
 from torch.autograd.function import once_differentiable
 from torch.nn.modules.utils import _pair
 
+from detectron2.layers.wrappers import disable_torch_compiler
+
 
 class _ROIAlignRotated(Function):
     @staticmethod
+    @disable_torch_compiler
     def forward(ctx, input, roi, output_size, spatial_scale, sampling_ratio):
         ctx.save_for_backward(roi)
         ctx.output_size = _pair(output_size)
@@ -78,6 +81,15 @@ class ROIAlignRotated(nn.Module):
         if orig_dtype == torch.float16:
             input = input.float()
             rois = rois.float()
+        output_size = _pair(self.output_size)
+
+        # Scripting for Autograd is currently unsupported.
+        # This is a quick fix without having to rewrite code on the C++ side
+        if torch.jit.is_scripting() or torch.jit.is_tracing():
+            return torch.ops.detectron2.roi_align_rotated_forward(
+                input, rois, self.spatial_scale, output_size[0], output_size[1], self.sampling_ratio
+            ).to(dtype=orig_dtype)
+
         return roi_align_rotated(
             input, rois, self.output_size, self.spatial_scale, self.sampling_ratio
         ).to(dtype=orig_dtype)

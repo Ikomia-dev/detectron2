@@ -121,6 +121,8 @@ _C.DATALOADER.ASPECT_RATIO_GROUPING = True
 _C.DATALOADER.SAMPLER_TRAIN = "TrainingSampler"
 # Repeat threshold for RepeatFactorTrainingSampler
 _C.DATALOADER.REPEAT_THRESHOLD = 0.0
+# if True, take square root when computing repeating factor
+_C.DATALOADER.REPEAT_SQRT = True
 # Tf True, when working on datasets that have instance annotations, the
 # training dataloader will filter out images without associated annotations
 _C.DATALOADER.FILTER_EMPTY_ANNOTATIONS = True
@@ -318,6 +320,15 @@ _C.MODEL.ROI_BOX_HEAD.NORM = ""
 _C.MODEL.ROI_BOX_HEAD.CLS_AGNOSTIC_BBOX_REG = False
 # If true, RoI heads use bounding boxes predicted by the box head rather than proposal boxes.
 _C.MODEL.ROI_BOX_HEAD.TRAIN_ON_PRED_BOXES = False
+
+# Federated loss can be used to improve the training of LVIS
+_C.MODEL.ROI_BOX_HEAD.USE_FED_LOSS = False
+# Sigmoid cross entrophy is used with federated loss
+_C.MODEL.ROI_BOX_HEAD.USE_SIGMOID_CE = False
+# The power value applied to image_count when calcualting frequency weight
+_C.MODEL.ROI_BOX_HEAD.FED_LOSS_FREQ_WEIGHT_POWER = 0.5
+# Number of classes to keep in total
+_C.MODEL.ROI_BOX_HEAD.FED_LOSS_NUM_CLASSES = 50
 
 # ---------------------------------------------------------------------------- #
 # Cascaded Box Head
@@ -532,10 +543,14 @@ _C.SOLVER.WEIGHT_DECAY_NORM = 0.0
 _C.SOLVER.GAMMA = 0.1
 # The iteration number to decrease learning rate by GAMMA.
 _C.SOLVER.STEPS = (30000,)
+# Number of decays in WarmupStepWithFixedGammaLR schedule
+_C.SOLVER.NUM_DECAYS = 3
 
 _C.SOLVER.WARMUP_FACTOR = 1.0 / 1000
 _C.SOLVER.WARMUP_ITERS = 1000
 _C.SOLVER.WARMUP_METHOD = "linear"
+# Whether to rescale the interval for the learning schedule after warmup
+_C.SOLVER.RESCALE_INTERVAL = False
 
 # Save a checkpoint after every this number of iterations
 _C.SOLVER.CHECKPOINT_PERIOD = 5000
@@ -621,6 +636,10 @@ _C.SEED = -1
 # for about 10k iterations. It usually hurts total time, but can benefit for certain models.
 # If input images have the same or similar sizes, benchmark is often helpful.
 _C.CUDNN_BENCHMARK = False
+# Option to set PyTorch matmul and CuDNN's float32 precision. When set to non-empty string,
+# the corresponding precision ("highest", "high" or "medium") will be used. The highest
+# precision will effectively disable tf32.
+_C.FLOAT32_PRECISION = ""
 # The period (in terms of steps) for minibatch visualization at train time.
 # Set to 0 to disable.
 _C.VIS_PERIOD = 0

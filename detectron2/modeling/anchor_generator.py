@@ -6,7 +6,7 @@ import torch
 from torch import nn
 
 from detectron2.config import configurable
-from detectron2.layers import ShapeSpec
+from detectron2.layers import ShapeSpec, move_device_like
 from detectron2.structures import Boxes, RotatedBoxes
 from detectron2.utils.registry import Registry
 
@@ -36,13 +36,17 @@ class BufferList(nn.Module):
         return iter(self._buffers.values())
 
 
-def _create_grid_offsets(size: List[int], stride: int, offset: float, device: torch.device):
+def _create_grid_offsets(
+    size: List[int], stride: int, offset: float, target_device_tensor: torch.Tensor
+):
     grid_height, grid_width = size
-    shifts_x = torch.arange(
-        offset * stride, grid_width * stride, step=stride, dtype=torch.float32, device=device
+    shifts_x = move_device_like(
+        torch.arange(offset * stride, grid_width * stride, step=stride, dtype=torch.float32),
+        target_device_tensor,
     )
-    shifts_y = torch.arange(
-        offset * stride, grid_height * stride, step=stride, dtype=torch.float32, device=device
+    shifts_y = move_device_like(
+        torch.arange(offset * stride, grid_height * stride, step=stride, dtype=torch.float32),
+        target_device_tensor,
     )
 
     shift_y, shift_x = torch.meshgrid(shifts_y, shifts_x)
@@ -167,7 +171,7 @@ class DefaultAnchorGenerator(nn.Module):
         # buffers() not supported by torchscript. use named_buffers() instead
         buffers: List[torch.Tensor] = [x[1] for x in self.cell_anchors.named_buffers()]
         for size, stride, base_anchors in zip(grid_sizes, self.strides, buffers):
-            shift_x, shift_y = _create_grid_offsets(size, stride, self.offset, base_anchors.device)
+            shift_x, shift_y = _create_grid_offsets(size, stride, self.offset, base_anchors)
             shifts = torch.stack((shift_x, shift_y, shift_x, shift_y), dim=1)
 
             anchors.append((shifts.view(-1, 1, 4) + base_anchors.view(1, -1, 4)).reshape(-1, 4))
@@ -198,7 +202,7 @@ class DefaultAnchorGenerator(nn.Module):
 
         anchors = []
         for size in sizes:
-            area = size ** 2.0
+            area = size**2.0
             for aspect_ratio in aspect_ratios:
                 # s * s = w * h
                 # a = h / w
@@ -223,7 +227,7 @@ class DefaultAnchorGenerator(nn.Module):
                 where Hi, Wi are resolution of the feature map divided by anchor stride.
         """
         grid_sizes = [feature_map.shape[-2:] for feature_map in features]
-        anchors_over_all_feature_maps = self._grid_anchors(grid_sizes)
+        anchors_over_all_feature_maps = self._grid_anchors(grid_sizes)  # pyre-ignore
         return [Boxes(x) for x in anchors_over_all_feature_maps]
 
 
@@ -311,10 +315,14 @@ class RotatedAnchorGenerator(nn.Module):
         """
         return [len(cell_anchors) for cell_anchors in self.cell_anchors]
 
-    def _grid_anchors(self, grid_sizes):
+    def _grid_anchors(self, grid_sizes: List[List[int]]):
         anchors = []
-        for size, stride, base_anchors in zip(grid_sizes, self.strides, self.cell_anchors):
-            shift_x, shift_y = _create_grid_offsets(size, stride, self.offset, base_anchors.device)
+        for size, stride, base_anchors in zip(
+            grid_sizes,
+            self.strides,
+            self.cell_anchors._buffers.values(),
+        ):
+            shift_x, shift_y = _create_grid_offsets(size, stride, self.offset, base_anchors)
             zeros = torch.zeros_like(shift_x)
             shifts = torch.stack((shift_x, shift_y, zeros, zeros, zeros), dim=1)
 
@@ -345,7 +353,7 @@ class RotatedAnchorGenerator(nn.Module):
         """
         anchors = []
         for size in sizes:
-            area = size ** 2.0
+            area = size**2.0
             for aspect_ratio in aspect_ratios:
                 # s * s = w * h
                 # a = h / w

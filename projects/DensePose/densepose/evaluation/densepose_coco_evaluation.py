@@ -5,6 +5,8 @@
 # LICENSE file in the root directory of this source tree.
 # This is a modified version of cocoeval.py where we also have the densepose evaluation.
 
+# pyre-unsafe
+
 __author__ = "tsungyi"
 
 import copy
@@ -59,7 +61,7 @@ class DensePoseDataMode(str, Enum):
     I_DT_UV_0 = "idtuv0"
 
 
-class DensePoseCocoEval(object):
+class DensePoseCocoEval:
     # Interface for evaluating detection on the Microsoft COCO dataset.
     #
     # The usage for CocoEval is as follows:
@@ -193,7 +195,7 @@ class DensePoseCocoEval(object):
                 # dataset. This is not a correct segmentation annotation
                 # in terms of COCO format; we need to deal with it somehow
                 segm = ann["segmentation"]
-                if type(segm) == list and len(segm) == 0:
+                if type(segm) is list and len(segm) == 0:
                     ann["segmentation"] = None
                     continue
                 rle = coco.annToRLE(ann)
@@ -220,7 +222,7 @@ class DensePoseCocoEval(object):
             if iregion is None:
                 return True
 
-            bb = np.array(dt["bbox"]).astype(np.int)
+            bb = np.array(dt["bbox"]).astype(int)
             x1, y1, x2, y2 = bb[0], bb[1], bb[0] + bb[2], bb[1] + bb[3]
             x2 = min([x2, iregion.shape[1]])
             y2 = min([y2, iregion.shape[0]])
@@ -527,7 +529,7 @@ class DensePoseCocoEval(object):
                     z = np.zeros(k)
                     dx = np.max((z, x0 - xd), axis=0) + np.max((z, xd - x1), axis=0)
                     dy = np.max((z, y0 - yd), axis=0) + np.max((z, yd - y1), axis=0)
-                e = (dx ** 2 + dy ** 2) / vars / (gt["area"] + np.spacing(1)) / 2
+                e = (dx**2 + dy**2) / vars / (gt["area"] + np.spacing(1)) / 2
                 if k1 > 0:
                     e = e[vg > 0]
                 ious[i, j] = np.sum(np.exp(-e)) / e.shape[0]
@@ -543,11 +545,11 @@ class DensePoseCocoEval(object):
             dy = max(int(dt["bbox"][3]), 1)
             dx = max(int(dt["bbox"][2]), 1)
             return (
-                # pyre-fixme[16]: `Tensor` has no attribute `argmax`.
                 F.interpolate(
-                    # pyre-fixme[6]: Expected `Optional[int]` for 2nd param but got
-                    #  `Tuple[int, int]`.
-                    dt["coarse_segm"].unsqueeze(0), (dy, dx), mode="bilinear", align_corners=False
+                    dt["coarse_segm"].unsqueeze(0),
+                    (dy, dx),
+                    mode="bilinear",
+                    align_corners=False,
                 )
                 .squeeze(0)
                 .argmax(0)
@@ -564,9 +566,10 @@ class DensePoseCocoEval(object):
             dx = max(int(dt["bbox"][2]), 1)
             return (
                 F.interpolate(
-                    # pyre-fixme[6]: Expected `Optional[int]` for 2nd param but got
-                    #  `Tuple[int, int]`.
-                    coarse_segm.unsqueeze(0), (dy, dx), mode="bilinear", align_corners=False
+                    coarse_segm.unsqueeze(0),
+                    (dy, dx),
+                    mode="bilinear",
+                    align_corners=False,
                 )
                 .squeeze(0)
                 .argmax(0)
@@ -741,8 +744,8 @@ class DensePoseCocoEval(object):
                     dx = int(dt["bbox"][2])
                     dp_x = np.array(gt["dp_x"]) * g_[2] / 255.0
                     dp_y = np.array(gt["dp_y"]) * g_[3] / 255.0
-                    py = (dp_y + g_[1] - dt["bbox"][1]).astype(np.int)
-                    px = (dp_x + g_[0] - dt["bbox"][0]).astype(np.int)
+                    py = (dp_y + g_[1] - dt["bbox"][1]).astype(int)
+                    px = (dp_x + g_[0] - dt["bbox"][0]).astype(int)
                     #
                     pts = np.zeros(len(px))
                     pts[px >= dx] = -1
@@ -761,7 +764,7 @@ class DensePoseCocoEval(object):
                         )
                         # Compute gps
                         ogps_values = np.exp(
-                            -(dists_between_matches ** 2) / (2 * (dist_norm_coeffs ** 2))
+                            -(dists_between_matches**2) / (2 * (dist_norm_coeffs**2))
                         )
                         #
                         ogps = np.mean(ogps_values) if len(ogps_values) > 0 else 0.0
@@ -981,8 +984,8 @@ class DensePoseCocoEval(object):
                         continue
                     tps = np.logical_and(dtm, np.logical_not(dtIg))
                     fps = np.logical_and(np.logical_not(dtm), np.logical_not(dtIg))
-                    tp_sum = np.cumsum(tps, axis=1).astype(dtype=np.float)
-                    fp_sum = np.cumsum(fps, axis=1).astype(dtype=np.float)
+                    tp_sum = np.cumsum(tps, axis=1).astype(dtype=float)
+                    fp_sum = np.cumsum(fps, axis=1).astype(dtype=float)
                     for t, (tp, fp) in enumerate(zip(tp_sum, fp_sum)):
                         tp = np.array(tp)
                         fp = np.array(fp)
@@ -1259,10 +1262,10 @@ class Params:
         self.recThrs = np.linspace(0.0, 1.00, int(np.round((1.00 - 0.0) / 0.01)) + 1, endpoint=True)
         self.maxDets = [1, 10, 100]
         self.areaRng = [
-            [0 ** 2, 1e5 ** 2],
-            [0 ** 2, 32 ** 2],
-            [32 ** 2, 96 ** 2],
-            [96 ** 2, 1e5 ** 2],
+            [0**2, 1e5**2],
+            [0**2, 32**2],
+            [32**2, 96**2],
+            [96**2, 1e5**2],
         ]
         self.areaRngLbl = ["all", "small", "medium", "large"]
         self.useCats = 1
@@ -1274,7 +1277,7 @@ class Params:
         self.iouThrs = np.linspace(0.5, 0.95, np.round((0.95 - 0.5) / 0.05) + 1, endpoint=True)
         self.recThrs = np.linspace(0.0, 1.00, np.round((1.00 - 0.0) / 0.01) + 1, endpoint=True)
         self.maxDets = [20]
-        self.areaRng = [[0 ** 2, 1e5 ** 2], [32 ** 2, 96 ** 2], [96 ** 2, 1e5 ** 2]]
+        self.areaRng = [[0**2, 1e5**2], [32**2, 96**2], [96**2, 1e5**2]]
         self.areaRngLbl = ["all", "medium", "large"]
         self.useCats = 1
 
@@ -1284,7 +1287,7 @@ class Params:
         self.iouThrs = np.linspace(0.5, 0.95, int(np.round((0.95 - 0.5) / 0.05)) + 1, endpoint=True)
         self.recThrs = np.linspace(0.0, 1.00, int(np.round((1.00 - 0.0) / 0.01)) + 1, endpoint=True)
         self.maxDets = [20]
-        self.areaRng = [[0 ** 2, 1e5 ** 2], [32 ** 2, 96 ** 2], [96 ** 2, 1e5 ** 2]]
+        self.areaRng = [[0**2, 1e5**2], [32**2, 96**2], [96**2, 1e5**2]]
         self.areaRngLbl = ["all", "medium", "large"]
         self.useCats = 1
 

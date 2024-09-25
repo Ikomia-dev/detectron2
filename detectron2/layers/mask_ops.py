@@ -11,7 +11,7 @@ __all__ = ["paste_masks_in_image"]
 BYTES_PER_FLOAT = 4
 # TODO: This memory limit may be too much or too little. It would be better to
 # determine it based on available resources.
-GPU_MEM_LIMIT = 1024 ** 3  # 1 GB memory limit
+GPU_MEM_LIMIT = 1024**3  # 1 GB memory limit
 
 
 def _do_paste_mask(masks, boxes, img_h: int, img_w: int, skip_empty: bool = True):
@@ -185,7 +185,7 @@ def paste_mask_in_image_old(mask, box, img_h, img_w, threshold):
     # Resample the mask from it's original grid to the new samples_w x samples_h grid
     mask = Image.fromarray(mask.cpu().numpy())
     mask = mask.resize((samples_w, samples_h), resample=Image.BILINEAR)
-    mask = np.array(mask, copy=False)
+    mask = np.asarray(mask)
 
     if threshold >= 0:
         mask = np.array(mask > threshold, dtype=np.uint8)

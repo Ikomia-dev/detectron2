@@ -5,6 +5,8 @@ import torch
 from torchvision.ops import boxes as box_ops
 from torchvision.ops import nms  # noqa . for compatibility
 
+from detectron2.layers.wrappers import disable_torch_compiler
+
 
 def batched_nms(
     boxes: torch.Tensor, scores: torch.Tensor, idxs: torch.Tensor, iou_threshold: float
@@ -22,7 +24,8 @@ def batched_nms(
 
 # Note: this function (nms_rotated) might be moved into
 # torchvision/ops/boxes.py in the future
-def nms_rotated(boxes, scores, iou_threshold):
+@disable_torch_compiler
+def nms_rotated(boxes: torch.Tensor, scores: torch.Tensor, iou_threshold: float):
     """
     Performs non-maximum suppression (NMS) on the rotated boxes according
     to their intersection-over-union (IoU).
@@ -88,7 +91,12 @@ def nms_rotated(boxes, scores, iou_threshold):
 
 # Note: this function (batched_nms_rotated) might be moved into
 # torchvision/ops/boxes.py in the future
-def batched_nms_rotated(boxes, scores, idxs, iou_threshold):
+
+
+@torch.jit.script_if_tracing
+def batched_nms_rotated(
+    boxes: torch.Tensor, scores: torch.Tensor, idxs: torch.Tensor, iou_threshold: float
+):
     """
     Performs non-maximum suppression in a batched fashion.
 

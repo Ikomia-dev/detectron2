@@ -1,5 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 
+# pyre-unsafe
+
 from typing import Any, Dict, List
 import torch
 from torch import nn
@@ -67,7 +69,7 @@ class EmbeddingLoss:
             dict(int -> tensor): losses for different mesh IDs
         """
         losses = {}
-        for mesh_id_tensor in packed_annotations.vertex_mesh_ids_gt.unique():  # pyre-ignore[16]
+        for mesh_id_tensor in packed_annotations.vertex_mesh_ids_gt.unique():
             mesh_id = mesh_id_tensor.item()
             mesh_name = MeshCatalog.get_mesh_name(mesh_id)
             # valid points are those that fall into estimated bbox
@@ -102,10 +104,6 @@ class EmbeddingLoss:
             ) / (-self.embdist_gauss_sigma)
             losses[mesh_name] = F.cross_entropy(scores, vertex_indices_i, ignore_index=-1)
 
-        # pyre-fixme[29]:
-        #  `Union[BoundMethod[typing.Callable(torch.Tensor.__iter__)[[Named(self,
-        #  torch.Tensor)], typing.Iterator[typing.Any]], torch.Tensor], nn.Module,
-        #  torch.Tensor]` is not a function.
         for mesh_name in embedder.mesh_names:
             if mesh_name not in losses:
                 losses[mesh_name] = self.fake_value(
@@ -115,10 +113,6 @@ class EmbeddingLoss:
 
     def fake_values(self, densepose_predictor_outputs: Any, embedder: nn.Module):
         losses = {}
-        # pyre-fixme[29]:
-        #  `Union[BoundMethod[typing.Callable(torch.Tensor.__iter__)[[Named(self,
-        #  torch.Tensor)], typing.Iterator[typing.Any]], torch.Tensor], nn.Module,
-        #  torch.Tensor]` is not a function.
         for mesh_name in embedder.mesh_names:
             losses[mesh_name] = self.fake_value(densepose_predictor_outputs, embedder, mesh_name)
         return losses

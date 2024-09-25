@@ -1,5 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 
+# pyre-unsafe
+
 import logging
 import os
 from collections import OrderedDict
@@ -210,6 +212,7 @@ class Trainer(DefaultTrainer):
             nesterov=cfg.SOLVER.NESTEROV,
             weight_decay=cfg.SOLVER.WEIGHT_DECAY,
         )
+        # pyre-fixme[6]: For 2nd param expected `Type[Optimizer]` but got `SGD`.
         return maybe_add_gradient_clipping(cfg, optimizer)
 
     @classmethod

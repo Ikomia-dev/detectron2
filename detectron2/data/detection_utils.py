@@ -195,9 +195,11 @@ def check_image_size(dataset_dict, image):
         if not image_wh == expected_wh:
             raise SizeMismatchError(
                 "Mismatched image shape{}, got {}, expect {}.".format(
-                    " for image " + dataset_dict["file_name"]
-                    if "file_name" in dataset_dict
-                    else "",
+                    (
+                        " for image " + dataset_dict["file_name"]
+                        if "file_name" in dataset_dict
+                        else ""
+                    ),
                     image_wh,
                     expected_wh,
                 )
@@ -252,6 +254,19 @@ def transform_proposals(dataset_dict, image_shape, transforms, *, proposal_topk,
         proposals.proposal_boxes = boxes[:proposal_topk]
         proposals.objectness_logits = objectness_logits[:proposal_topk]
         dataset_dict["proposals"] = proposals
+
+
+def get_bbox(annotation):
+    """
+    Get bbox from data
+    Args:
+        annotation (dict): dict of instance annotations for a single instance.
+    Returns:
+        bbox (ndarray): x1, y1, x2, y2 coordinates
+    """
+    # bbox is 1d (per-instance bounding box)
+    bbox = BoxMode.convert(annotation["bbox"], annotation["bbox_mode"], BoxMode.XYXY_ABS)
+    return bbox
 
 
 def transform_instance_annotations(
@@ -529,6 +544,29 @@ def create_keypoint_hflip_indices(dataset_names: Union[str, List[str]]) -> List[
     flipped_names = [i if i not in flip_map else flip_map[i] for i in names]
     flip_indices = [names.index(i) for i in flipped_names]
     return flip_indices
+
+
+def get_fed_loss_cls_weights(dataset_names: Union[str, List[str]], freq_weight_power=1.0):
+    """
+    Get frequency weight for each class sorted by class id.
+    We now calcualte freqency weight using image_count to the power freq_weight_power.
+
+    Args:
+        dataset_names: list of dataset names
+        freq_weight_power: power value
+    """
+    if isinstance(dataset_names, str):
+        dataset_names = [dataset_names]
+
+    check_metadata_consistency("class_image_count", dataset_names)
+
+    meta = MetadataCatalog.get(dataset_names[0])
+    class_freq_meta = meta.class_image_count
+    class_freq = torch.tensor(
+        [c["image_count"] for c in sorted(class_freq_meta, key=lambda x: x["id"])]
+    )
+    class_freq_weight = class_freq.float() ** freq_weight_power
+    return class_freq_weight
 
 
 def gen_crop_transform_with_instance(crop_size, image_size, instance):

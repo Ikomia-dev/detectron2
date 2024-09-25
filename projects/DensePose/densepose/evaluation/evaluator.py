@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Facebook, Inc. and its affiliates.
 
+# pyre-unsafe
+
 import contextlib
 import copy
 import io
@@ -291,7 +293,7 @@ def _evaluate_predictions_on_coco(
     multi_storage=None,
     embedder=None,
     class_names=None,
-    min_threshold: float=0.5,
+    min_threshold: float = 0.5,
     img_ids=None,
 ):
     logger = logging.getLogger(__name__)
@@ -319,7 +321,7 @@ def _evaluate_predictions_on_coco(
     return results
 
 
-def _get_densepose_metrics(min_threshold: float=0.5):
+def _get_densepose_metrics(min_threshold: float = 0.5):
     metrics = ["AP"]
     if min_threshold <= 0.201:
         metrics += ["AP20"]
