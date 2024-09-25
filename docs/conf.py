@@ -33,7 +33,7 @@ class GithubURLDomain(Domain):
     """
 
     name = "githuburl"
-    ROOT = "https://github.com/facebookresearch/detectron2/blob/master/"
+    ROOT = "https://github.com/facebookresearch/detectron2/blob/main/"
     LINKED_DOC = ["tutorials/install", "tutorials/getting_started"]
 
     def resolve_any_xref(self, env, fromdocname, builder, target, node, contnode):
@@ -282,8 +282,6 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
         "ResNetBlockBase",
         "GroupedBatchSampler",
         "build_transform_gen",
-        "export_caffe2_model",
-        "export_onnx_model",
         "apply_transform_gens",
         "TransformGen",
         "apply_augmentations",
@@ -294,6 +292,7 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
         "WarmupMultiStepLR",
         "downgrade_config",
         "upgrade_config",
+        "add_export_config",
     }
     try:
         if name in HIDDEN or (

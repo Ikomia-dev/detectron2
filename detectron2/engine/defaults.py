@@ -493,6 +493,15 @@ class DefaultTrainer(TrainerBase):
         self._trainer.iter = self.iter
         self._trainer.run_step()
 
+    def state_dict(self):
+        ret = super().state_dict()
+        ret["_trainer"] = self._trainer.state_dict()
+        return ret
+
+    def load_state_dict(self, state_dict):
+        super().load_state_dict(state_dict)
+        self._trainer.load_state_dict(state_dict["_trainer"])
+
     @classmethod
     def build_model(cls, cfg):
         """
